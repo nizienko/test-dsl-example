@@ -2,7 +2,7 @@ package dsl
 
 fun suite(title: String, suiteBody: Suite.() -> Unit): Suite = Suite(title).apply(suiteBody)
 
-class Suite(val title: String) {
+open class Suite(val title: String) {
     val _tests = mutableListOf<Test>()
 
     fun test(title: String, testBody: Test.() -> Unit = {}) = _tests.add(Test(title).apply(testBody))
@@ -32,9 +32,12 @@ class Step(val title: String) {
     var description: String = ""
     var expectedResult: String = ""
 
-    fun automated(code: (testContext: TestContext) -> Unit) {
+    inline fun <reified T> automated(noinline code: T.() -> Unit) {
         _automated = true
-        _automationFunc = code
+        _automationFunc = {
+            val specificContext = T::class.java.getConstructor(TestContext::class.java).newInstance(it) as T
+            specificContext.code()
+        }
     }
 }
 

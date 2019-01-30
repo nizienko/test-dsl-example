@@ -1,14 +1,18 @@
 package testsExamples
 
-import dsl.randomEmail
-import dsl.randomNumber
-import dsl.randomString
-import dsl.suite
+import dsl.*
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.chrome.ChromeDriver
 
 val yandexSuite =
 
     suite("Yandex acceptance tests") {
 
+        test("WebDriver") {
+            step("Init") {
+
+            }
+        }
 
         test("Login with wrong credentials") {
             step("Open browser in incognito mode") {
@@ -33,14 +37,14 @@ val yandexSuite =
         test("Check calculator") {
             step("Check that you have 'chromdriver'") {
                 description =
-                        "download from https://chromedriver.storage.googleapis.com/index.html?path=2.45/ to working directory"
+                    "download from https://chromedriver.storage.googleapis.com/index.html?path=2.45/ to working directory"
                 expectedResult = "You have 'chromdriver'"
             }
             step("Open browser") {
-                automated { it.yandexSteps().openPage() }
+                automated<YandexAutomatedSteps> { openPage() }
             }
             step("Search 'Calculator'") {
-                automated { it.yandexSteps().search("Калькулятор") }
+                automated<YandexAutomatedSteps> { search("Калькулятор") }
             }
             step("Check that 'Calculator appeared'") {
                 expectedResult = "You can see calculator in 'Search result page'"
@@ -52,8 +56,35 @@ val yandexSuite =
                 expectedResult = "Result is correct"
             }
             step("Close browser") {
-                automated { it.yandexSteps().closeBrowser() }
+                automated<YandexAutomatedSteps> { closeBrowser() }
                 expectedResult = "Browser closed"
             }
         }
     }
+
+
+
+class WebDriverInit : Suite("WebDriver test") {
+
+    class WebDriverCtx(testContext: TestContext) {
+        var webDriver by Ctx<WebDriver>(testContext)
+    }
+
+    init {
+        test("WebDriver") {
+            step("Init") {
+                automated<WebDriverCtx> {
+                    webDriver = ChromeDriver()
+                }
+            }
+            step("Open url") {
+                automated<WebDriverCtx> {
+                    webDriver.get("https://yandex.ru")
+                }
+            }
+        }
+    }
+}
+
+
+
